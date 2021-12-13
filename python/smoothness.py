@@ -5,7 +5,18 @@ smoothness.py contains a list of functions for estimating movement smoothness.
 import numpy as np
 
 
-def spectral_arclength(movement, fs, padlevel=4, fc=10.0, amp_th=0.05):
+def spectral_arclength(movement, fs, window_len = 5, padlevel=4, fc=10.0, amp_th=0.05):
+    pass
+    N = len(movement)
+    sal_arr = [];
+    for i in range(N-window_len):
+        win_movement = movement[i:i+window_len]
+        sal, (f, Mf), (f_sel, Mf_sel) = calc_spectral_arclength(win_movement, fs)
+        sal_arr.append(sal)
+    return sal_arr
+    
+
+def calc_spectral_arclength(movement, fs, padlevel=4, fc=10.0, amp_th=0.05):
     """
     Calcualtes the smoothness of the given speed profile using the modified spectral
     arc length metric.
@@ -87,7 +98,15 @@ def spectral_arclength(movement, fs, padlevel=4, fc=10.0, amp_th=0.05):
     return new_sal, (f, Mf), (f_sel, Mf_sel)
 
 
-def dimensionless_jerk(movement, fs):
+# def dimensionless_jerk(movement, fs, window_len=5):
+#     N = len(movement)
+#     jerk = [];
+#     for i in range(N-window_len):
+#         win_movement = movement[i:i+window_len]
+#         jerk.append(calc_dimensionless_jerk(win_movement,fs))
+#     return jerk
+
+def dimensionless_jerk(movement, fs, window_len=5):
     """
     Calculates the smoothness metric for the given speed profile using the dimensionless jerk 
     metric.
@@ -119,19 +138,28 @@ def dimensionless_jerk(movement, fs):
     """
     # first enforce data into an numpy array.
     movement = np.array(movement)
+    jerkarr = []
 
     # calculate the scale factor and jerk.
+    N = len(movement)
     movement_peak = max(abs(movement))
     dt = 1./fs
     movement_dur = len(movement)*dt
-    jerk = np.diff(movement, 2)/pow(dt, 2)
     scale = pow(movement_dur, 3)/pow(movement_peak, 2)
+    
+    
+    # jerk = np.diff(movement, 2)/pow(dt, 2)
+    for i in range(N-window_len):
+        win_movement = movement[i:i+window_len]
+        jerk = np.diff(win_movement, 2)/pow(dt, 2)
+        # Append dj
+        jerkarr.append(- scale * sum(pow(jerk, 2)) * dt)
 
     # estimate dj
-    return - scale * sum(pow(jerk, 2)) * dt
+    return jerkarr
 
 
-def log_dimensionless_jerk(movement, fs):
+def log_dimensionless_jerk(movement, fs, window_len=5):
     """
     Calculates the smoothness metric for the given speed profile using the log dimensionless jerk 
     metric.
@@ -161,6 +189,6 @@ def log_dimensionless_jerk(movement, fs):
     '-5.81636'
 
     """
-    return -np.log(abs(dimensionless_jerk(movement, fs)))
+    return -np.log(list(map(abs,dimensionless_jerk(movement, fs, window_len))))
 
 
