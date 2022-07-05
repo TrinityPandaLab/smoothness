@@ -1,4 +1,5 @@
 import numpy as np
+import pickle
 
 # helper function
 def getInfo(D, alg_num, col_name):
@@ -27,5 +28,9 @@ for i in range(n_algos):
 
 	for j in range(n_steps):
 		a = int(action_keys[j])
-		chosen_actions[i,j,:] = value_list[a]-1
+		chosen_actions[i,j,:] = value_list[a]-1 +2 # the 2 is added so that spectral arclength doesn't raise any error
 # 		print("\tstep "+str(j)+": action "+str(a)+"\t= "+str(chosen_actions[i,j,:]))
+
+
+with open("saved_actions_r.pk", 'wb') as handle:
+    pickle.dump(chosen_actions, handle)
