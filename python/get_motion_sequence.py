@@ -1,5 +1,6 @@
 import numpy as np
 import pickle
+import sys
 
 # helper function
 def getInfo(D, alg_num, col_name):
@@ -28,9 +29,9 @@ for i in range(n_algos):
 
 	for j in range(n_steps):
 		a = int(action_keys[j])
-		chosen_actions[i,j,:] = value_list[a]-1 +2 # the 2 is added so that spectral arclength doesn't raise any error
+		chosen_actions[i,j,:] = value_list[a]-1+ sys.float_info.min # the 2 is added so that spectral arclength doesn't raise any error
 # 		print("\tstep "+str(j)+": action "+str(a)+"\t= "+str(chosen_actions[i,j,:]))
 
 
-with open("saved_actions_r.pk", 'wb') as handle:
+with open("saved_actions_r1.pk", 'wb') as handle:
     pickle.dump(chosen_actions, handle)
